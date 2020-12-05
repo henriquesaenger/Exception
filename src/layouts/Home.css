@@ -1,0 +1,11 @@
+.container_all_homepage{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.container_menu_homepage{
+    background-color: #410A78;
+    height: 50px;
+    width: 100%;
+}

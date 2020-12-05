@@ -45,7 +45,9 @@ export default class extends Component{
     handleChange = (e) =>{this.setState({value: e.target.value})}
 
     handleLogin(){
-        Authentication.auth().signInWithEmailAndPassword(this.state.email, this.state.password).catch((err) =>{
+        Authentication.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then((user) => {
+            this.props.history.push("/home");
+        }).catch((err) =>{
             switch(err.code){
                 case "auth/invalid-email":
                     Swal.fire({
@@ -75,7 +77,11 @@ export default class extends Component{
             Swal.fire({
                 icon: 'success',
                 title: 'Usuário Cadastrado!!!',
-                text: 'Seja bem vindo a nossa plataforma'
+                text: 'Seja bem vindo a nossa plataforma',
+                confirmButtonText: 'Avançar',
+                confirmButtonColor: '#410A78'
+              }).then(() => {
+                this.props.history.push("/");
               })
             }).catch((err) =>{
             switch(err.code){
