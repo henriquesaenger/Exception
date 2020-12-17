@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import "../layouts/Home.css";
-import Map from "./Map";
+import  MapContainer  from "./MapContainer";
 
 
 export default class Home extends Component{
@@ -23,7 +23,7 @@ export default class Home extends Component{
 
                 </div>
                 <div className="container_map_homepage">
-                    <Map/>
+                    <MapContainer/>                    
                 </div>
             </div>
         )
