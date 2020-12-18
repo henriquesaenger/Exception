@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Map, GoogleApiWrapper, Marker, InfoWindow} from 'google-maps-react';
 import firebase from './firestore';
+import Swal from 'sweetalert2';
 
 const styleMap= {
   width: "100%",
@@ -50,7 +51,26 @@ export class MapContainer extends Component {
   displayMarkers = () => {
     return this.state.pos.map((posit, index) => {
       if(this.state.rest[index].Tipo == "Restaurante"){
-      return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"} title={this.state.rest[index].Nome} onClick={this.onMarkerClick}>
+      return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"} title={this.state.rest[index].Nome} onClick={() => {
+        console.log("foi clicado");
+        Swal.fire({
+          title: "Gostou de "+ this.state.rest[index].Nome+ "?",
+          icon: "question",
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'Gostei!',
+          denyButtonText: 'Não gostei',
+          cancelButtonText: 'Voltar',
+          confirmButtonColor: '#4CAF50',
+        }).then((result) => {
+          if (result.isConfirmed) {
+
+          } else if (result.isDenied) {
+            Swal.fire('Changes are not saved', '', 'info')
+          }
+        })
+      }}>
+          
           <InfoWindow marker={this.state.activeMarker} onClose={this.onInfoWindowClose} visible={this.state.showingInfoWindow}>
             <div>
               <h1>{this.state.rest[index].Nome}</h1>
@@ -59,7 +79,26 @@ export class MapContainer extends Component {
         </Marker>
     }
     else{
-      return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/purple-dot.png"} title={this.state.rest[index].Nome} onClick={this.onMarkerClick}>
+      return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/purple-dot.png"} title={this.state.rest[index].Nome} onClick={() => {
+        console.log("foi clicado");
+        Swal.fire({
+          title: "Gostou de "+ this.state.rest[index].Nome+ "?",
+          icon: "question",
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'Gostei!',
+          denyButtonText: 'Não gostei',
+          cancelButtonText: 'Voltar',
+          confirmButtonColor: '#4CAF50',
+        }).then((result) => {
+          if (result.isConfirmed) {
+
+          } else if (result.isDenied) {
+            Swal.fire('Changes are not saved', '', 'info')
+          }
+        })
+      }}>
+          
           <InfoWindow position={posit} marker={this.state.activeMarker} onClose={this.onInfoWindowClose} visible={this.state.showingInfoWindow}>
             <div>
               <h1>{this.state.rest[index].Nome}</h1>

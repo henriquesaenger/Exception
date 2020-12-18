@@ -8,4 +8,20 @@
     background-color: #410A78;
     height: 50px;
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.container_menu_homepage button{
+    background-color: #410A78;
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.Botoes_menu{
+    display: flex;
+    flex-direction: row;
 }
