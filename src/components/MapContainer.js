@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { Map, GoogleApiWrapper, Marker, InfoWindow} from 'google-maps-react';
 import firebase from './firestore';
 import Swal from 'sweetalert2';
+import { map } from 'jquery';
 
 const styleMap= {
   width: "100%",
@@ -10,13 +11,14 @@ const styleMap= {
 
 export class MapContainer extends Component {
   constructor(){
-    super();
     
+    super();
     this.state = {
       rest: [],
       lat: [],
       lng: [],
       pos: [],
+      nota:{},
       activeMarker: {},
       selectedPlace: {},
       showingInfoWindow: false
@@ -64,9 +66,41 @@ export class MapContainer extends Component {
           confirmButtonColor: '#4CAF50',
         }).then((result) => {
           if (result.isConfirmed) {
-
+            console.log("deu like");
+            if(this.state.nota == {}){
+              var single= this.state.nota;
+              single[this.state.rest[index].Id]= 1;
+              this.setState({Nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
+            else{
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 1;
+              this.setState({nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
           } else if (result.isDenied) {
-            Swal.fire('Changes are not saved', '', 'info')
+            console.log("deu dislike");
+            if(this.state.nota == {}){
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 0;
+              this.setState({nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
+            else{
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 0;
+              this.setState({nota: single});  
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }  
           }
         })
       }}>
@@ -92,9 +126,41 @@ export class MapContainer extends Component {
           confirmButtonColor: '#4CAF50',
         }).then((result) => {
           if (result.isConfirmed) {
-
+            console.log("deu like");
+            if(this.state.nota == {}){
+              var single= this.state.nota;
+              single[this.state.rest[index].Id]= 1;
+              this.setState({Nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
+            else{
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 1;
+              this.setState({nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
           } else if (result.isDenied) {
-            Swal.fire('Changes are not saved', '', 'info')
+            console.log("deu dislike");
+            if(this.state.nota == {}){
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 0;
+              this.setState({nota: single});
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }
+            else{
+              var single= this.state.nota;
+              single[this.state.rest[index].Id] = 0;
+              this.setState({nota: single});  
+              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+                Notas: this.state.nota
+              })
+            }  
           }
         })
       }}>
@@ -124,7 +190,19 @@ export class MapContainer extends Component {
       }
       this.setState({ pos: positions});
       console.log(this.state.pos);
+      firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
+        if(dados.exists){
+          this.setState({nota: dados.data().Notas});
+          console.log(dados.data().Notas)
+          console.log(this.state.nota)
+        }
+        else{
+          this.setState({nota: {} });
+          console.log(this.state.nota)
+        }
+      })
     });
+    
   }
 
   render() {
