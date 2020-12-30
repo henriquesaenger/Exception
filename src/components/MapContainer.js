@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import { Map, GoogleApiWrapper, Marker, InfoWindow} from 'google-maps-react';
 import firebase from './firestore';
 import Swal from 'sweetalert2';
-import { map } from 'jquery';
 
 const styleMap= {
   width: "100%",
@@ -13,6 +12,7 @@ export class MapContainer extends Component {
   constructor(){
     
     super();
+    
     this.state = {
       rest: [],
       lat: [],
@@ -56,20 +56,23 @@ export class MapContainer extends Component {
       return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"} title={this.state.rest[index].Nome} onClick={() => {
         console.log("foi clicado");
         Swal.fire({
-          title: "Gostou de "+ this.state.rest[index].Nome+ "?",
+          title: "Classifique "+ this.state.rest[index].Nome+ "?",
           icon: "question",
-          showDenyButton: true,
-          showCancelButton: true,
-          confirmButtonText: 'Gostei!',
-          denyButtonText: 'Não gostei',
-          cancelButtonText: 'Voltar',
-          confirmButtonColor: '#4CAF50',
+          input: 'range',
+          inputAttributes: {
+            min: 1,
+            max: 5,
+            step: 1
+          },
+          inputValue: 3,
+          cancelButtonText: 'Classificar',
+          cancelButtonColor: '#4CAF50',
         }).then((result) => {
-          if (result.isConfirmed) {
-            console.log("deu like");
+          var aval= Number(result.value);
+          if(aval > 0 && aval < 6){
             if(this.state.nota == {}){
               var single= this.state.nota;
-              single[this.state.rest[index].Id]= 1;
+              single[this.state.rest[index].Id]= aval;
               this.setState({Nota: single});
               firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
                 Notas: this.state.nota
@@ -77,33 +80,18 @@ export class MapContainer extends Component {
             }
             else{
               var single= this.state.nota;
-              single[this.state.rest[index].Id] = 1;
+              single[this.state.rest[index].Id] = aval;
               this.setState({nota: single});
               firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
                 Notas: this.state.nota
               })
             }
-          } else if (result.isDenied) {
-            console.log("deu dislike");
-            if(this.state.nota == {}){
-              var single= this.state.nota;
-              single[this.state.rest[index].Id] = 0;
-              this.setState({nota: single});
-              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
-                Notas: this.state.nota
-              })
-            }
-            else{
-              var single= this.state.nota;
-              single[this.state.rest[index].Id] = 0;
-              this.setState({nota: single});  
-              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
-                Notas: this.state.nota
-              })
-            }  
           }
         })
-      }}>
+        
+      }}
+      
+      >
           
           <InfoWindow marker={this.state.activeMarker} onClose={this.onInfoWindowClose} visible={this.state.showingInfoWindow}>
             <div>
@@ -116,20 +104,23 @@ export class MapContainer extends Component {
       return <Marker key={index} id={index} position={posit} icon={"http://maps.google.com/mapfiles/ms/icons/purple-dot.png"} title={this.state.rest[index].Nome} onClick={() => {
         console.log("foi clicado");
         Swal.fire({
-          title: "Gostou de "+ this.state.rest[index].Nome+ "?",
+          title: "Classifique "+ this.state.rest[index].Nome+ "?",
           icon: "question",
-          showDenyButton: true,
-          showCancelButton: true,
-          confirmButtonText: 'Gostei!',
-          denyButtonText: 'Não gostei',
-          cancelButtonText: 'Voltar',
-          confirmButtonColor: '#4CAF50',
+          input: 'range',
+          inputAttributes: {
+            min: 1,
+            max: 5,
+            step: 1
+          },
+          inputValue: 3,
+          cancelButtonText: 'Classificar',
+          cancelButtonColor: '#4CAF50',
         }).then((result) => {
-          if (result.isConfirmed) {
-            console.log("deu like");
+          var aval= Number(result.value);
+          if(aval > 0 && aval < 6){
             if(this.state.nota == {}){
               var single= this.state.nota;
-              single[this.state.rest[index].Id]= 1;
+              single[this.state.rest[index].Id]= aval;
               this.setState({Nota: single});
               firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
                 Notas: this.state.nota
@@ -137,30 +128,12 @@ export class MapContainer extends Component {
             }
             else{
               var single= this.state.nota;
-              single[this.state.rest[index].Id] = 1;
+              single[this.state.rest[index].Id] = aval;
               this.setState({nota: single});
               firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
                 Notas: this.state.nota
               })
             }
-          } else if (result.isDenied) {
-            console.log("deu dislike");
-            if(this.state.nota == {}){
-              var single= this.state.nota;
-              single[this.state.rest[index].Id] = 0;
-              this.setState({nota: single});
-              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
-                Notas: this.state.nota
-              })
-            }
-            else{
-              var single= this.state.nota;
-              single[this.state.rest[index].Id] = 0;
-              this.setState({nota: single});  
-              firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
-                Notas: this.state.nota
-              })
-            }  
           }
         })
       }}>

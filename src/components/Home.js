@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import "../layouts/Home.css";
-import  MapContainer  from "./MapContainer";
+import MapContainer  from "./MapContainer";
 import firebase from "firebase/app";
 import Swal from 'sweetalert2';
 
@@ -37,7 +37,9 @@ export default class Home extends Component{
             <div className="container_all_homepage">
                 <div className="container_menu_homepage">
                     <div className="Botoes_menu">
+                        <button onClick={() => {this.props.history.push("/home")}}>Home</button>
                         <button>Preferências</button>
+                        <button onClick={() => {this.props.history.push("/recomendacao")}}>Recomendações</button>
                     </div>
                     <button onClick={() => {firebase.auth().signOut().then(() => {
                         this.props.history.push("/");

@@ -1,0 +1,37 @@
+.container_all_homepage{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.container_menu_homepage{
+    background-color: #410A78;
+    height: 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.container_menu_homepage button{
+    background-color: #410A78;
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.Botoes_menu{
+    display: flex;
+    flex-direction: row;
+}
+
+.container_recomendacao{
+    margin-left: 40px;
+}
+
+.card{
+    font-size: 18px;
+    color: #410A78;
+    
+}
