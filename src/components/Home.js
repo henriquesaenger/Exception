@@ -3,6 +3,7 @@ import "../layouts/Home.css";
 import MapContainer  from "./MapContainer";
 import firebase from "firebase/app";
 import Swal from 'sweetalert2';
+import $ from 'jquery';
 
 export default class Home extends Component{
 
@@ -10,7 +11,7 @@ export default class Home extends Component{
         super();
         
         this.state = {
-            
+
         };
         this.handleChange = this.handleChange.bind(this);
     }
@@ -18,18 +19,20 @@ export default class Home extends Component{
     handleChange = (e) =>{this.setState({value: e.target.value})}
 
     componentDidMount(){
-        var user = firebase.auth().currentUser;
-        if (user) {
-        console.log(user);
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Nenhum usuário conectado!!!',
-                text:  'Você será redirecionado a página de login',
-            }).then(
-                this.props.history.push("/")
-              );
-        }
+        $("body").css("overflow", "hidden");
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nenhum usuário conectado!!!',
+                    text:  'Você será redirecionado a página de login',
+                }).then(
+                    this.props.history.push("/")
+                  );
+            }
+        })
     }
 
     render(){
@@ -38,7 +41,43 @@ export default class Home extends Component{
                 <div className="container_menu_homepage">
                     <div className="Botoes_menu">
                         <button onClick={() => {this.props.history.push("/home")}}>Home</button>
-                        <button>Preferências</button>
+                        <button onClick={() =>{
+                             Swal.fire({
+                                icon: 'info',
+                                title: 'Quer saber um lugar que tenha opções de alimentação para alérgicos a:',
+                                input: 'select',
+                                inputOptions: {
+                                    'Alergias':{
+                                        lactose: 'Lactose',
+                                        gluten: 'Glúten',
+                                        ambos: 'Ambos'
+                                    }
+                                },
+                                inputPlaceholder: 'Selecione uma alergia',
+                                showCancelButton: true,
+                              }).then((resposta) =>{
+                                  console.log(resposta);
+                                  if(resposta.value == "lactose"){
+                                      console.log("entrou lactose");
+                                      localStorage.setItem("preferencias", resposta.value);
+                                      window.location.reload();
+                                  }
+                                  else{
+                                      if(resposta.value == "gluten"){
+                                          console.log("entrou gluten");
+                                          localStorage.setItem("preferencias", resposta.value);
+                                          window.location.reload();
+                                      }
+                                      else{
+                                          if(resposta.value == "ambos"){
+                                              console.log("entrou ambos");
+                                              localStorage.setItem("preferencias", resposta.value);
+                                              window.location.reload();
+                                          }
+                                      }
+                                  }
+                              })
+                        }}>Preferências</button>
                         <button onClick={() => {this.props.history.push("/recomendacao")}}>Recomendações</button>
                     </div>
                     <button onClick={() => {firebase.auth().signOut().then(() => {
@@ -49,6 +88,9 @@ export default class Home extends Component{
                                 title: 'Ocorreu algum erro!'
                               })
                         })}}>Sair</button>
+                </div>
+                <div className="searchbar">
+                    <input type="text" placeholder="Qual estabelecimento deseja buscar?"/>
                 </div>
                 <div className="container_map_homepage">
                     <MapContainer/>                    

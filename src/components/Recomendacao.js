@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import "../layouts/Recomendacao.css";
 import firebase from './firestore';
 import Swal from 'sweetalert2';
+import $ from 'jquery';
 
 
 
@@ -16,8 +17,8 @@ export default class Recomendacao extends Component{
             ranking: [],
             usuarios: 0,
             recomendar: {},
-            rankitems: []
-
+            rankitems: [],
+            hora: ''
         };
         this.handleChange = this.handleChange.bind(this);
         this.pearson= this.pearson.bind(this);
@@ -80,7 +81,6 @@ export default class Recomendacao extends Component{
         for(var others in dataset){
             if(others != pessoa){
                 var val = this.pearson(this.state.avaliacoes,pessoa,others);
-                console.log(val)
                 var p = others;
                 scores.push({val:val,p:p});
             }
@@ -121,15 +121,24 @@ export default class Recomendacao extends Component{
         for(var item in dataset[other]){
             if(!(item in dataset[person]) ||(dataset[person][item]==0)){
                 //the setter help to make this look nice.
+                /*if(this.state.hora >= 11 && this.state.hora<=14  && this.state.avaliacoes){
+                    similar= similar * 0.8;
+                }
+                else{
+                    if(this.state.hora >14 && this.state.hora <= 19){
+                    
+                    }
+                }*/
+                console.log(this.state.avaliacoes[person][item]);
+                console.log(similar);
                 totals.setDefault(item,dataset[other][item]*similar);
                 simsum.setDefault(item,similar);                        
-                    }
-                
             }
+        }
         }
         for(var item in totals){
         //this what the setter function does
-        //so we have to find a way to avoid the function in the object     
+        //so we have to find a way to avoid the function in the object    
             if(typeof totals[item] !="function"){
                 var val = totals[item] / simsum[item];
                 rank_lst.push({val:val,items:item});
@@ -143,35 +152,67 @@ export default class Recomendacao extends Component{
             recommend.push(rank_lst[i].items);
         }
         console.log([rank_lst,recommend]);
+        console.log(rank_lst);
+        console.log(recommend);
         this.setState({rankitems: recommend})
         var list= {};
-        firebase.firestore().collection("Restaurantes").get().then((querySnapshot) => {
+        if(localStorage.getItem("preferencias") == "lactose"){
+        firebase.firestore().collection("Restaurantes").where("LactoseFO", "==", true).get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 // doc.data() is never undefined for query doc snapshots
                 var verify=String(doc.data().Id);
-                console.log(doc.data().Id);
                 if(recommend.includes(verify)){
                     list[doc.data().Id]= doc.data();
                 }
             });
         this.setState({recomendar: list});
-        console.log(list);
-    })}
+        })}
+        else{
+            if(localStorage.getItem("preferencias") == "gluten"){
+                firebase.firestore().collection("Restaurantes").where("GlutenFO", "==", true).get().then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        // doc.data() is never undefined for query doc snapshots
+                        var verify=String(doc.data().Id);
+                        if(recommend.includes(verify)){
+                            list[doc.data().Id]= doc.data();
+                        }
+                    });
+                this.setState({recomendar: list});
+                })}
+            else{
+                if(localStorage.getItem("preferencias") == "ambos"){
+                    firebase.firestore().collection("Restaurantes").where("Id", ">=", 0).get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            // doc.data() is never undefined for query doc snapshots
+                            var verify=String(doc.data().Id);
+                            if(recommend.includes(verify)){
+                                list[doc.data().Id]= doc.data();
+                            }
+                        });
+                    this.setState({recomendar: list});
+                    })}
+            }
+        }
+        
+}
     
 
     componentDidMount(){
-        var user = firebase.auth().currentUser;
-        if (user) {
-        console.log(user);
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Nenhum usuário conectado!!!',
-                text:  'Você será redirecionado a página de login',
-            }).then(
-                this.props.history.push("/")
-              );
-        }
+        $("body").css("overflow-y", "scroll");
+        $(".container_all_homepage").css("height","auto");
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nenhum usuário conectado!!!',
+                    text:  'Você será redirecionado a página de login',
+                }).then(
+                    this.props.history.push("/")
+                  );
+            }
+        });
         var lista={};
         this.setState({usuarios: 0});
         firebase.firestore().collection("Users").get().then((querySnapshot) => {
@@ -181,10 +222,11 @@ export default class Recomendacao extends Component{
                 this.setState({usuarios: this.state.usuarios+1});
             });
             this.setState({avaliacoes: lista})
-            console.log(this.state.avaliacoes);
+            var date= new Date();
+            this.setState({hora: date.getHours()});
             this.rank(this.state.avaliacoes, firebase.auth().currentUser.uid, this.state.usuarios-1);
-            console.log(this.state.ranking);
             this.recomendador(this.state.avaliacoes, firebase.auth().currentUser.uid);
+            console.log(this.state.recomendar);
         });
     }
 
@@ -194,7 +236,43 @@ export default class Recomendacao extends Component{
                 <div className="container_menu_homepage">
                     <div className="Botoes_menu">
                         <button onClick={() => {this.props.history.push("/home")}}>Home</button>
-                        <button>Preferências</button>
+                        <button onClick={() =>{
+                             Swal.fire({
+                                icon: 'info',
+                                title: 'Quer saber um lugar que tenha opções de alimentação para alérgicos a:',
+                                input: 'select',
+                                inputOptions: {
+                                    'Alergias':{
+                                        lactose: 'Lactose',
+                                        gluten: 'Glúten',
+                                        ambos: 'Ambos'
+                                    }
+                                },
+                                inputPlaceholder: 'Selecione uma alergia',
+                                showCancelButton: true,
+                              }).then((resposta) =>{
+                                  console.log(resposta);
+                                  if(resposta.value == "lactose"){
+                                      console.log("entrou lactose");
+                                      localStorage.setItem("preferencias", resposta.value);
+                                      window.location.reload();
+                                  }
+                                  else{
+                                      if(resposta.value == "gluten"){
+                                          console.log("entrou gluten");
+                                          localStorage.setItem("preferencias", resposta.value);
+                                          window.location.reload();
+                                      }
+                                      else{
+                                          if(resposta.value == "ambos"){
+                                              console.log("entrou ambos");
+                                              localStorage.setItem("preferencias", resposta.value);
+                                              window.location.reload();
+                                          }
+                                      }
+                                  }
+                              })
+                        }}>Preferências</button>
                         <button onClick={() => {this.props.history.push("/recomendacao")}}>Recomendações</button>
                     </div>
                     <button onClick={() => {firebase.auth().signOut().then(() => {
@@ -208,10 +286,11 @@ export default class Recomendacao extends Component{
                 </div>
                 <div className="container_recomendacao">
                     {Object.values(Object.values(this.state.recomendar)).map((dado) => {
-                        console.log(dado.Nome);
-                        return <div className="card">
+                        console.log(dado);
+                        return <button className="card">
                             <h1>{dado.Nome}</h1>
-                        </div>
+                            <p>{dado.Tipo}</p>
+                        </button>
                         })
                     }
                 </div>

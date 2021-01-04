@@ -14,6 +14,8 @@ export class MapContainer extends Component {
     super();
     
     this.state = {
+      lat: '',
+      lng: '',
       rest: [],
       lat: [],
       lng: [],
@@ -27,6 +29,7 @@ export class MapContainer extends Component {
     this.onMarkerClick= this.onMarkerClick.bind(this);
     this.onInfoWindowClose= this.onInfoWindowClose.bind(this);
     this.onMapClicked= this.onMapClicked.bind(this);
+    this.centralizar= this.centralizar.bind(this);
   }
 
   onMarkerClick = (props, marker) =>
@@ -148,9 +151,19 @@ export class MapContainer extends Component {
   })
   }
 
-
+  centralizar(){
+    
+    navigator.geolocation.getCurrentPosition((position) => {
+      this.setState({lat: position.coords.latitude});
+      this.setState({lng: position.coords.longitude});
+      console.log(position);
+    });
+  }
   componentDidMount(){
-    firebase.firestore().collection("Restaurantes")
+    this.centralizar();
+    console.log(localStorage.getItem('preferencias'));
+    if(localStorage.getItem('preferencias') == "lactose"){
+    firebase.firestore().collection("Restaurantes").where("LactoseFO" , "==", true)
     .get()
     .then(querySnapshot => {
       const data = querySnapshot.docs.map(doc => doc.data());
@@ -174,18 +187,81 @@ export class MapContainer extends Component {
           console.log(this.state.nota)
         }
       })
+      
     });
-    
+  }
+  else{
+    if(localStorage.getItem('preferencias') == "gluten"){
+      firebase.firestore().collection("Restaurantes").where("GlutenFO" , "==", true)
+      .get()
+      .then(querySnapshot => {
+        const data = querySnapshot.docs.map(doc => doc.data());
+        console.log(data);
+        this.setState({ rest: data });
+        var positions= [];
+        for(var i=0; i<data.length; i++){
+          var myLatlng = {lat:data[i].Latitude , lng:data[i].Longitude};
+          positions.push(myLatlng);
+        }
+        this.setState({ pos: positions});
+        console.log(this.state.pos);
+        firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
+          if(dados.exists){
+            this.setState({nota: dados.data().Notas});
+            console.log(dados.data().Notas)
+            console.log(this.state.nota)
+          }
+          else{
+            this.setState({nota: {} });
+            console.log(this.state.nota)
+          }
+        })
+        
+      });
+    }
+    else{
+      if(localStorage.getItem('preferencias') == "ambos"){
+        firebase.firestore().collection("Restaurantes").where("Id" , ">=", 0)
+        .get()
+        .then(querySnapshot => {
+          const data = querySnapshot.docs.map(doc => doc.data());
+          console.log(data);
+          this.setState({ rest: data });
+          var positions= [];
+          for(var i=0; i<data.length; i++){
+            var myLatlng = {lat:data[i].Latitude , lng:data[i].Longitude};
+            positions.push(myLatlng);
+          }
+          this.setState({ pos: positions});
+          console.log(this.state.pos);
+          firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
+            if(dados.exists){
+              this.setState({nota: dados.data().Notas});
+              console.log(dados.data().Notas)
+              console.log(this.state.nota)
+            }
+            else{
+              this.setState({nota: {} });
+              console.log(this.state.nota)
+            }
+          })
+          
+        });
+      }
+    }
+  } 
   }
 
   render() {
+    const position= { lat: this.state.lat, lng: this.state.lng }
     return (
       <Map
         google={this.props.google}
-        zoom={15}
+        zoom={14}
         style={styleMap}
         onClick={this.onMapClicked}
-        initialCenter={{ lat: -31.7622969, lng: -52.3294118 }}
+        initialCenter={position}
+        center={position}
       >
       {this.displayMarkers()}
       </Map>

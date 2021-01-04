@@ -103,6 +103,11 @@ export default class extends Component{
     }
 
 
+    componentDidMount(){
+        localStorage.setItem('preferencias', "ambos");
+        console.log(localStorage.getItem('preferencias'))
+    }
+
 
     render(){
         return(
@@ -113,7 +118,7 @@ export default class extends Component{
                         <button className="login_botoes_login" onClick={() => this.escolha(1)}>Login</button>
                     </div>
                     <div className="container_login_info">
-                        <h1>Usuário</h1>
+                        <h1>Email</h1>
                         <input type="text" onChange={(e) => {this.setState({email: e.target.value })}}/>
                         <h1>Senha</h1>
                         <input type="password" onChange={(e) => {this.setState({password: e.target.value })}}/>
