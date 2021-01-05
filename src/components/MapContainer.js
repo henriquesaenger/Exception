@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import { Map, GoogleApiWrapper, Marker, InfoWindow} from 'google-maps-react';
 import firebase from './firestore';
 import Swal from 'sweetalert2';
+import { error } from 'jquery';
 
 const styleMap= {
   width: "100%",
-  height: "92%"
+  height: "92%",
 };
 
 export class MapContainer extends Component {
@@ -21,6 +22,7 @@ export class MapContainer extends Component {
       lng: [],
       pos: [],
       nota:{},
+      zoom: 15,
       activeMarker: {},
       selectedPlace: {},
       showingInfoWindow: false
@@ -151,23 +153,38 @@ export class MapContainer extends Component {
   })
   }
 
-  centralizar(){
-    
-    navigator.geolocation.getCurrentPosition((position) => {
-      this.setState({lat: position.coords.latitude});
-      this.setState({lng: position.coords.longitude});
-      console.log(position);
-    });
+  centralizar= () => {
+    var options = {
+      enableHighAccuracy: true,
+      timeout: 5000
+    };
+    this.setState({zoom: 15});
+    if(localStorage.getItem("controlador_rec") == 1){
+      this.setState({lat: localStorage.getItem("coord_res_lat")});
+      this.setState({lng: localStorage.getItem("coord_res_lng")});
+      localStorage.setItem("controlador_rec", 0);
+      this.setState({zoom: 18});
+      console.log(localStorage.getItem("coord_res_lat"));
+      console.log(localStorage.getItem("coord_res_lng"));
+      console.log(localStorage.getItem("controlador_rec"));
+    }
+    else{
+      navigator.geolocation.getCurrentPosition((position) => {
+        this.setState({lat: position.coords.latitude});
+        this.setState({lng: position.coords.longitude});
+        console.log(position);
+      }, error, options);
+    }
   }
+
+
   componentDidMount(){
     this.centralizar();
     console.log(localStorage.getItem('preferencias'));
     if(localStorage.getItem('preferencias') == "lactose"){
-    firebase.firestore().collection("Restaurantes").where("LactoseFO" , "==", true)
-    .get()
+    firebase.firestore().collection("Restaurantes").where("LactoseFO" , "==", true).get()
     .then(querySnapshot => {
       const data = querySnapshot.docs.map(doc => doc.data());
-      console.log(data);
       this.setState({ rest: data });
       var positions= [];
       for(var i=0; i<data.length; i++){
@@ -175,16 +192,12 @@ export class MapContainer extends Component {
         positions.push(myLatlng);
       }
       this.setState({ pos: positions});
-      console.log(this.state.pos);
       firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
         if(dados.exists){
           this.setState({nota: dados.data().Notas});
-          console.log(dados.data().Notas)
-          console.log(this.state.nota)
         }
         else{
           this.setState({nota: {} });
-          console.log(this.state.nota)
         }
       })
       
@@ -196,7 +209,6 @@ export class MapContainer extends Component {
       .get()
       .then(querySnapshot => {
         const data = querySnapshot.docs.map(doc => doc.data());
-        console.log(data);
         this.setState({ rest: data });
         var positions= [];
         for(var i=0; i<data.length; i++){
@@ -204,16 +216,12 @@ export class MapContainer extends Component {
           positions.push(myLatlng);
         }
         this.setState({ pos: positions});
-        console.log(this.state.pos);
         firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
           if(dados.exists){
             this.setState({nota: dados.data().Notas});
-            console.log(dados.data().Notas)
-            console.log(this.state.nota)
           }
           else{
             this.setState({nota: {} });
-            console.log(this.state.nota)
           }
         })
         
@@ -225,7 +233,6 @@ export class MapContainer extends Component {
         .get()
         .then(querySnapshot => {
           const data = querySnapshot.docs.map(doc => doc.data());
-          console.log(data);
           this.setState({ rest: data });
           var positions= [];
           for(var i=0; i<data.length; i++){
@@ -233,16 +240,12 @@ export class MapContainer extends Component {
             positions.push(myLatlng);
           }
           this.setState({ pos: positions});
-          console.log(this.state.pos);
           firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
             if(dados.exists){
               this.setState({nota: dados.data().Notas});
-              console.log(dados.data().Notas)
-              console.log(this.state.nota)
             }
             else{
               this.setState({nota: {} });
-              console.log(this.state.nota)
             }
           })
           
@@ -253,11 +256,12 @@ export class MapContainer extends Component {
   }
 
   render() {
-    const position= { lat: this.state.lat, lng: this.state.lng }
+    const position= { lat: this.state.lat, lng: this.state.lng };
+    const zoom= this.state.zoom;
     return (
       <Map
         google={this.props.google}
-        zoom={14}
+        zoom={zoom}
         style={styleMap}
         onClick={this.onMapClicked}
         initialCenter={position}

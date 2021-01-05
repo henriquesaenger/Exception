@@ -82,6 +82,8 @@ export default class extends Component{
                 confirmButtonColor: '#410A78'
               }).then(() => {
                 this.props.history.push("/");
+                this.handleLogin();
+
               })
             }).catch((err) =>{
             switch(err.code){
@@ -105,6 +107,9 @@ export default class extends Component{
 
     componentDidMount(){
         localStorage.setItem('preferencias', "ambos");
+        localStorage.setItem("coord_res_lat", 0);
+        localStorage.setItem("coord_res_lng", 0);
+        localStorage.setItem("controlador_rec", 0);
         console.log(localStorage.getItem('preferencias'))
     }
 

@@ -24,6 +24,7 @@ export default class Recomendacao extends Component{
         this.pearson= this.pearson.bind(this);
         this.rank= this.rank.bind(this);
         this.recomendador= this.recomendador.bind(this);
+        this.botao_centralizar= this.botao_centralizar.bind(this);
     }
 
 
@@ -195,7 +196,16 @@ export default class Recomendacao extends Component{
         }
         
 }
-    
+
+    botao_centralizar(latitude, longitude){     //função pra setar as coordenadas do setcenter do maps
+        localStorage.setItem("coord_res_lat", latitude);
+        localStorage.setItem("coord_res_lng", longitude);
+        localStorage.setItem("controlador_rec", 1);
+        console.log(localStorage.getItem("coord_res_lat"));
+        console.log(localStorage.getItem("coord_res_lng"));
+        console.log(localStorage.getItem("controlador_rec"));
+        this.props.history.push("/home");
+    }
 
     componentDidMount(){
         $("body").css("overflow-y", "scroll");
@@ -273,7 +283,7 @@ export default class Recomendacao extends Component{
                                   }
                               })
                         }}>Preferências</button>
-                        <button onClick={() => {this.props.history.push("/recomendacao")}}>Recomendações</button>
+                        <button onClick={() => {window.location.reload()}}>Recomendações</button>
                     </div>
                     <button onClick={() => {firebase.auth().signOut().then(() => {
                         this.props.history.push("/");
@@ -287,7 +297,7 @@ export default class Recomendacao extends Component{
                 <div className="container_recomendacao">
                     {Object.values(Object.values(this.state.recomendar)).map((dado) => {
                         console.log(dado);
-                        return <button className="card">
+                        return <button className="card" onClick={() => this.botao_centralizar(dado.Latitude, dado.Longitude)}>
                             <h1>{dado.Nome}</h1>
                             <p>{dado.Tipo}</p>
                         </button>

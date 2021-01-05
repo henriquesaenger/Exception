@@ -40,7 +40,7 @@ export default class Home extends Component{
             <div className="container_all_homepage">
                 <div className="container_menu_homepage">
                     <div className="Botoes_menu">
-                        <button onClick={() => {this.props.history.push("/home")}}>Home</button>
+                        <button onClick={() => {window.location.reload()}}>Home</button>
                         <button onClick={() =>{
                              Swal.fire({
                                 icon: 'info',
@@ -50,7 +50,7 @@ export default class Home extends Component{
                                     'Alergias':{
                                         lactose: 'Lactose',
                                         gluten: 'Glúten',
-                                        ambos: 'Ambos'
+                                        ambos: 'Nenhuma das opções'
                                     }
                                 },
                                 inputPlaceholder: 'Selecione uma alergia',
