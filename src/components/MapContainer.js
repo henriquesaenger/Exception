@@ -4,10 +4,7 @@ import firebase from './firestore';
 import Swal from 'sweetalert2';
 import { error } from 'jquery';
 
-const styleMap= {
-  width: "100%",
-  height: "92%",
-};
+
 
 export class MapContainer extends Component {
   constructor(){
@@ -33,6 +30,9 @@ export class MapContainer extends Component {
     this.onMapClicked= this.onMapClicked.bind(this);
     this.centralizar= this.centralizar.bind(this);
   }
+
+
+
 
   onMarkerClick = (props, marker) =>
   this.setState({
@@ -153,7 +153,7 @@ export class MapContainer extends Component {
   })
   }
 
-  centralizar= () => {
+  centralizar = () => {
     var options = {
       enableHighAccuracy: true,
       timeout: 5000
@@ -164,21 +164,27 @@ export class MapContainer extends Component {
       this.setState({lng: localStorage.getItem("coord_res_lng")});
       localStorage.setItem("controlador_rec", 0);
       this.setState({zoom: 18});
-      console.log(localStorage.getItem("coord_res_lat"));
-      console.log(localStorage.getItem("coord_res_lng"));
-      console.log(localStorage.getItem("controlador_rec"));
     }
     else{
-      navigator.geolocation.getCurrentPosition((position) => {
-        this.setState({lat: position.coords.latitude});
-        this.setState({lng: position.coords.longitude});
-        console.log(position);
-      }, error, options);
+      if(localStorage.getItem("controlador_rec") == 0){
+        navigator.geolocation.getCurrentPosition((position) => {
+          this.setState({lat: position.coords.latitude});
+          this.setState({lng: position.coords.longitude});
+          console.log(position);
+        }, error, options);
+      }
+      else{
+        console.log("entrou");
+        localStorage.setItem("controlador_rec", 0);
+      }
     }
   }
 
 
   componentDidMount(){
+    window.addEventListener("storage",(() => {
+      console.log(localStorage.getItem("busca"));
+    }).bind(this));
     this.centralizar();
     console.log(localStorage.getItem('preferencias'));
     if(localStorage.getItem('preferencias') == "lactose"){
@@ -256,6 +262,10 @@ export class MapContainer extends Component {
   }
 
   render() {
+    const styleMap= {
+      width: "100%",
+      height: "92%",
+    };
     const position= { lat: this.state.lat, lng: this.state.lng };
     const zoom= this.state.zoom;
     return (

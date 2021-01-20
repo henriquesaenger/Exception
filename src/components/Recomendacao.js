@@ -194,8 +194,7 @@ export default class Recomendacao extends Component{
                     })}
             }
         }
-        
-}
+    }
 
     botao_centralizar(latitude, longitude){     //função pra setar as coordenadas do setcenter do maps
         localStorage.setItem("coord_res_lat", latitude);

@@ -40,9 +40,10 @@
 }
 
 .container_recomendacao :hover{
-    background-color: #410A78;
+    background: linear-gradient(to bottom right, #660066 0%, #6666ff 100%);
     color: white;
 }
+
 .card{
     display: flex;
     flex-direction: column;
@@ -61,6 +62,13 @@
 
 .card h1{
     margin-bottom: 0px;
+}
+.card h1 :hover{
+    background-image: transparent;
+}
+
+.card p :hover{
+    background-image: transparent;
 }
 .card p{
     margin-top: 5px;

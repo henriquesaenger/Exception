@@ -4,6 +4,8 @@ import MapContainer  from "./MapContainer";
 import firebase from "firebase/app";
 import Swal from 'sweetalert2';
 import $ from 'jquery';
+import Autocomplete from 'react-autocomplete';
+
 
 export default class Home extends Component{
 
@@ -11,7 +13,9 @@ export default class Home extends Component{
         super();
         
         this.state = {
-
+            value: "",
+            nomes: [],
+            restaurantes: {}
         };
         this.handleChange = this.handleChange.bind(this);
     }
@@ -33,6 +37,42 @@ export default class Home extends Component{
                   );
             }
         })
+        var list= {};
+        var ad= [];
+        if(localStorage.getItem("preferencias") == "lactose"){
+            firebase.firestore().collection("Restaurantes").where("LactoseFO", "==", true).get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    // doc.data() is never undefined for query doc snapshots
+                    {
+                        list[doc.data().Nome]= doc.data();
+                        ad.push({label: doc.data().Nome});
+                    }
+                });
+            this.setState({nomes: ad});
+            this.setState({restaurantes: list});
+            })}
+            else{
+                if(localStorage.getItem("preferencias") == "gluten"){
+                    firebase.firestore().collection("Restaurantes").where("GlutenFO", "==", true).get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            list[doc.data().Nome]= doc.data();
+                            ad.push({label: doc.data().Nome});
+                        });
+                    this.setState({nomes: ad});
+                    this.setState({restaurantes: list});
+                    })}
+                else{
+                    if(localStorage.getItem("preferencias") == "ambos"){
+                        firebase.firestore().collection("Restaurantes").where("Id", ">=", 0).get().then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                list[doc.data().Nome]= doc.data();
+                                ad.push({label: doc.data().Nome});
+                            });
+                        this.setState({nomes: ad});
+                        this.setState({restaurantes: list});
+                        })}
+                }
+            }
     }
 
     render(){
@@ -90,7 +130,27 @@ export default class Home extends Component{
                         })}}>Sair</button>
                 </div>
                 <div className="searchbar">
-                    <input type="text" placeholder="Qual estabelecimento deseja buscar?"/>
+                    <Autocomplete
+                        getItemValue={(item) => item.label}
+                        items={this.state.nomes}
+                        shouldItemRender={(item, value) => item.label.toLowerCase().indexOf(value.toLowerCase()) > -1}
+                            getItemValue={item => item.label}
+                            renderItem={(item, highlighted) =>
+                            <div
+                                key={item.id}
+                                style={{ backgroundColor: highlighted ? '#eee' : 'transparent'}}
+                            >
+                                {item.label}
+                            </div>
+                        }
+                        value={this.state.value}
+                        onChange={(e) => this.setState({value: e.target.value})}
+                        onSelect={(value) => {
+                            this.setState({value: value});
+                            localStorage.setItem("busca", value);
+                            console.log(value);
+                        }}
+                    />
                 </div>
                 <div className="container_map_homepage">
                     <MapContainer/>                    
