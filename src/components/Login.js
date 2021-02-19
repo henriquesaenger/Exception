@@ -1,4 +1,4 @@
-import "/home/henrique/Documents/exception/src/layouts/Login.css";
+import "../layouts/Login.css";
 import React, {Component} from 'react';
 import Authentication from './Auth';
 import $ from 'jquery';

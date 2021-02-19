@@ -18,9 +18,23 @@ export default class Home extends Component{
             restaurantes: {}
         };
         this.handleChange = this.handleChange.bind(this);
+        this.centralizar= this.centralizar.bind(this);
     }
 
     handleChange = (e) =>{this.setState({value: e.target.value})}
+
+    centralizar(restaurante){
+        console.log(restaurante);
+        console.log(restaurante.Latitude);
+        console.log(restaurante.Longitude);
+        localStorage.setItem("coord_res_lat", restaurante.Latitude);
+        localStorage.setItem("coord_res_lng", restaurante.Longitude);
+        localStorage.setItem("controlador_rec", 1);
+        console.log(localStorage.getItem("coord_res_lat"));
+        console.log(localStorage.getItem("coord_res_lng"));
+        console.log(localStorage.getItem("controlador_rec"));
+        window.location.reload();
+    }
 
     componentDidMount(){
         $("body").css("overflow", "hidden");
@@ -50,6 +64,8 @@ export default class Home extends Component{
                 });
             this.setState({nomes: ad});
             this.setState({restaurantes: list});
+            
+            console.log(this.state.restaurantes);
             })}
             else{
                 if(localStorage.getItem("preferencias") == "gluten"){
@@ -60,6 +76,8 @@ export default class Home extends Component{
                         });
                     this.setState({nomes: ad});
                     this.setState({restaurantes: list});
+                    
+            console.log(this.state.restaurantes);
                     })}
                 else{
                     if(localStorage.getItem("preferencias") == "ambos"){
@@ -70,9 +88,12 @@ export default class Home extends Component{
                             });
                         this.setState({nomes: ad});
                         this.setState({restaurantes: list});
+                        
+            console.log(this.state.restaurantes);
                         })}
                 }
             }
+            
     }
 
     render(){
@@ -149,6 +170,9 @@ export default class Home extends Component{
                             this.setState({value: value});
                             localStorage.setItem("busca", value);
                             console.log(value);
+                            //console.log(this.state.restaurantes[value]);
+                            this.centralizar(this.state.restaurantes[value]);
+
                         }}
                     />
                 </div>
