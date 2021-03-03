@@ -95,3 +95,21 @@
     width:50%;
     align-self: center;
 }
+
+@media screen and (max-width: 1024px){
+    .container_box_login{
+        width: 70%;
+    }
+  }
+
+  @media screen and (max-width: 650px){
+    .container_login_info{
+        width: 70%;
+    }
+  }
+
+  @media screen and (max-width: 300px){
+    .container_box_login{
+        width: 90%;
+    }
+  }

@@ -3,6 +3,8 @@ import "../layouts/Recomendacao.css";
 import firebase from './firestore';
 import Swal from 'sweetalert2';
 import $ from 'jquery';
+import { Navbar, NavDropdown, Form, FormControl, Button, Nav } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 
@@ -242,57 +244,63 @@ export default class Recomendacao extends Component{
     render(){
         return(
             <div className="container_all_homepage">
-                <div className="container_menu_homepage">
-                    <div className="Botoes_menu">
-                        <button onClick={() => {this.props.history.push("/home")}}>Home</button>
-                        <button onClick={() =>{
-                             Swal.fire({
-                                icon: 'info',
-                                title: 'Quer saber um lugar que tenha opções de alimentação para alérgicos a:',
-                                input: 'select',
-                                inputOptions: {
-                                    'Alergias':{
-                                        lactose: 'Lactose',
-                                        gluten: 'Glúten',
-                                        ambos: 'Ambos'
+               <Navbar id="menu_nav"  expand="md">
+                    <Navbar.Brand id="brand" href="">Exception</Navbar.Brand>
+                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                    <Navbar.Collapse id="basic-navbar-nav">
+                        <Nav className="mr-auto">
+                            <Nav.Link id="item" href="/home">Home</Nav.Link>
+                            <Nav.Link id="item" onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Quer saber um lugar que tenha opções de alimentação para alérgicos a:',
+                                    input: 'select',
+                                    inputOptions: {
+                                        'Alergias': {
+                                            lactose: 'Lactose',
+                                            gluten: 'Glúten',
+                                            ambos: 'Nenhuma das opções'
+                                        }
+                                    },
+                                    inputPlaceholder: 'Selecione uma alergia',
+                                    showCancelButton: true,
+                                }).then((resposta) => {
+                                    console.log(resposta);
+                                    if (resposta.value == "lactose") {
+                                        console.log("entrou lactose");
+                                        localStorage.setItem("preferencias", resposta.value);
+                                        window.location.reload();
                                     }
-                                },
-                                inputPlaceholder: 'Selecione uma alergia',
-                                showCancelButton: true,
-                              }).then((resposta) =>{
-                                  console.log(resposta);
-                                  if(resposta.value == "lactose"){
-                                      console.log("entrou lactose");
-                                      localStorage.setItem("preferencias", resposta.value);
-                                      window.location.reload();
-                                  }
-                                  else{
-                                      if(resposta.value == "gluten"){
-                                          console.log("entrou gluten");
-                                          localStorage.setItem("preferencias", resposta.value);
-                                          window.location.reload();
-                                      }
-                                      else{
-                                          if(resposta.value == "ambos"){
-                                              console.log("entrou ambos");
-                                              localStorage.setItem("preferencias", resposta.value);
-                                              window.location.reload();
-                                          }
-                                      }
-                                  }
-                              })
-                        }}>Preferências</button>
-                        <button onClick={() => {window.location.reload()}}>Recomendações</button>
-                    </div>
-                    <button onClick={() => {firebase.auth().signOut().then(() => {
-                        this.props.history.push("/");
+                                    else {
+                                        if (resposta.value == "gluten") {
+                                            console.log("entrou gluten");
+                                            localStorage.setItem("preferencias", resposta.value);
+                                            window.location.reload();
+                                        }
+                                        else {
+                                            if (resposta.value == "ambos") {
+                                                console.log("entrou ambos");
+                                                localStorage.setItem("preferencias", resposta.value);
+                                                window.location.reload();
+                                            }
+                                        }
+                                    }
+                                })
+                            }}>Preferências</Nav.Link>
+                            <Nav.Link id="item" href="/recomendacao">Recomendações</Nav.Link>
+                        </Nav>
+                        <button id="botao_sair" onClick={() => {
+                        firebase.auth().signOut().then(() => {
+                            this.props.history.push("/");
                         }).catch((error) => {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Ocorreu algum erro!'
-                              })
-                        })}}>Sair</button>
-                </div>
+                            })
+                        })
+                    }}>Sair</button>
+                    </Navbar.Collapse>
+                </Navbar>
                 <div className="container_recomendacao">
                     {Object.values(Object.values(this.state.recomendar)).map((dado) => {
                         console.log(dado);

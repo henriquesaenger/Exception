@@ -7,13 +7,14 @@
 
 .searchbar{
     position: absolute;
-    margin-top: 70px;
-    margin-left: 35%;
+    width: 100%;
+    text-align-last: center;
+    margin-top: 10px;
     z-index: 3;
 }
 
 .searchbar input{
-    width: 150%;
+    width: 300px;
     border-radius: 8px;
     border: 2px solid #410A78;
     color: #410A78;
@@ -44,3 +45,30 @@
     flex-direction: row;
 }
 
+#botao_sair{
+    background-color: rgb(255, 255, 255, 0.0);
+    border: none;
+    color: #FFFFFF;
+    margin-left: -6px;
+}
+
+#menu_nav{
+    background-color: #410A78;
+}
+
+#item{
+    color: #FFFFFF;
+    font-size: 15px;
+}
+
+#brand{
+    color: #FFFFFF;
+}
+
+
+
+@media screen and (max-width: 500px){
+    .searchbar input{
+        width: 200px;
+    }
+}
