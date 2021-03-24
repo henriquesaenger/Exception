@@ -20,28 +20,43 @@ export default class Recomendacao extends Component{
             usuarios: 0,
             recomendar: {},
             rankitems: [],
-            hora: ''
+            hora: '',
+            eu: '',
+            latitudes: [],
+            longitudes: [],
+            tipos:[]
+
         };
         this.handleChange = this.handleChange.bind(this);
         this.pearson= this.pearson.bind(this);
         this.rank= this.rank.bind(this);
         this.recomendador= this.recomendador.bind(this);
         this.botao_centralizar= this.botao_centralizar.bind(this);
+        this.euclidean= this.euclidean.bind(this);
     }
 
 
     handleChange = (e) =>{this.setState({value: e.target.value})}
 
 
+
+
+    euclidean(item){
+       
+    
+
+        
+    }
+
+
     pearson(dataset, p1, p2){
         var existp1p2 = {};
         for(item in dataset[p1]){
             if(item in dataset[p2]){
-                existp1p2[item] = 1
+                existp1p2[item] = 1;
             }
         }
         var num_existence = Object.getOwnPropertyNames(existp1p2).length;
-        console.log(num_existence);
         if(num_existence == 0){ 
             return 0;
         }
@@ -57,19 +72,10 @@ export default class Recomendacao extends Component{
             p2_sq_sum += Math.pow(dataset[p2][item],2);
             prod_p1p2 += dataset[p1][item]*dataset[p2][item];
         }
-        console.log(p1_sum);
-        console.log(p2_sum);
-        console.log(p1_sq_sum);
-        console.log(p2_sq_sum);
-        console.log(prod_p1p2);
         var numerator =prod_p1p2 - (p1_sum*p2_sum/num_existence);
         var st1 = p1_sq_sum - Math.pow(p1_sum,2)/num_existence;
         var st2 = p2_sq_sum -Math.pow(p2_sum,2)/num_existence;
         var denominator = Math.sqrt(st1*st2);
-        console.log(numerator);
-        console.log(st1);
-        console.log(st2);
-        console.log(denominator);
         if(denominator ==0) return 0;
         else {
             var val = numerator / denominator;
@@ -88,7 +94,6 @@ export default class Recomendacao extends Component{
                 scores.push({val:val,p:p});
             }
         }
-        console.log(scores);
         scores.sort(function(a,b){
             return b.val < a.val ? -1 : b.val > a.val ? 1 : b.val >= a.val ? 0 : NaN;
         });
@@ -100,102 +105,141 @@ export default class Recomendacao extends Component{
     }
 
     recomendador(dataset, person){
-        var totals = {
-            setDefault:function(props,value){
-                if(!this[props]){
-                    this[props] =0;
-                }
-                this[props] += value;
-            }
-        },
-        simsum = {
-            setDefault:function(props,value){
-                if(!this[props]){
-                    this[props] =0;
-                }
-                this[props] += value;
-            }
-        },
-        rank_lst =[];
-        for(var other in dataset){
-        if(other ===person) continue;
-        var similar = this.pearson(dataset,person,other);
-        if(similar <=0) continue;
-        for(var item in dataset[other]){
-            if(!(item in dataset[person]) ||(dataset[person][item]==0)){
-                //the setter help to make this look nice.
-                /*if(this.state.hora >= 11 && this.state.hora<=14  && this.state.avaliacoes){
-                    similar= similar * 0.8;
-                }
-                else{
-                    if(this.state.hora >14 && this.state.hora <= 19){
-                    
+            var totals = {
+                setDefault:function(props,value){
+                    if(!this[props]){
+                        this[props] =0;
                     }
-                }*/
-                console.log(this.state.avaliacoes[person][item]);
-                console.log(similar);
-                totals.setDefault(item,dataset[other][item]*similar);
-                simsum.setDefault(item,similar);                        
-            }
-        }
-        }
-        for(var item in totals){
-        //this what the setter function does
-        //so we have to find a way to avoid the function in the object    
-            if(typeof totals[item] !="function"){
-                var val = totals[item] / simsum[item];
-                rank_lst.push({val:val,items:item});
-           }
-        }
-        rank_lst.sort(function(a,b){
-            return b.val < a.val ? -1 : b.val > a.val ? 1 : b.val >= a.val ? 0 : NaN;
-        });
-        var recommend = []; 
-        for(var i in rank_lst){
-            recommend.push(rank_lst[i].items);
-        }
-        console.log([rank_lst,recommend]);
-        console.log(rank_lst);
-        console.log(recommend);
-        this.setState({rankitems: recommend})
-        var list= {};
-        if(localStorage.getItem("preferencias") == "lactose"){
-        firebase.firestore().collection("Restaurantes").where("LactoseFO", "==", true).get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                // doc.data() is never undefined for query doc snapshots
-                var verify=String(doc.data().Id);
-                if(recommend.includes(verify)){
-                    list[doc.data().Id]= doc.data();
+                    this[props] += value;
                 }
-            });
-        this.setState({recomendar: list});
-        })}
-        else{
-            if(localStorage.getItem("preferencias") == "gluten"){
-                firebase.firestore().collection("Restaurantes").where("GlutenFO", "==", true).get().then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        // doc.data() is never undefined for query doc snapshots
-                        var verify=String(doc.data().Id);
-                        if(recommend.includes(verify)){
-                            list[doc.data().Id]= doc.data();
+            },
+            simsum = {
+                setDefault:function(props,value){
+                    if(!this[props]){
+                        this[props] =0;
+                    }
+                    this[props] += value;
+                }
+            },
+            rank_lst =[];
+            for(var other in dataset){  //para uma dada pessoa presente no dataset
+            if(other ===person) continue;   //se essa pessoa for igual ao usuário, o ciclo apenas segue
+            var similar = this.pearson(dataset,person,other);   //calcula-se a similaridade dessa outra pessoa com o usuário
+            if(similar <=0) continue;                           //se a similaridade for menor que 0, o sistema nem considera
+            for(var item in dataset[other]){                    //para as avaliações dessa pessoa
+                if(!(item in dataset[person]) ||(dataset[person][item]==0)){    //se o item não foi avaliado pelo usuário ou a avaliação consta como zero 
+                    //the setter help to make this look nice.
+                    /*if(this.state.hora >= 11 && this.state.hora<=14  && this.state.avaliacoes){
+                        similar= similar * 0.8;
+                    }
+                    else{
+                        if(this.state.hora >14 && this.state.hora <= 19){
+                        
                         }
-                    });
-                this.setState({recomendar: list});
-                })}
-            else{
-                if(localStorage.getItem("preferencias") == "ambos"){
-                    firebase.firestore().collection("Restaurantes").where("Id", ">=", 0).get().then((querySnapshot) => {
-                        querySnapshot.forEach((doc) => {
+                    }*/
+                    totals.setDefault(item,dataset[other][item]*similar);
+                    simsum.setDefault(item,similar);                        
+                }
+            }
+            }
+            for(var item in totals){
+                if(typeof totals[item] !="function"){
                             // doc.data() is never undefined for query doc snapshots
+                            var dista =  Math.sqrt( Math.pow((this.state.latitudes[item]-this.state.eu.latitude), 2) + Math.pow((this.state.longitudes[item] -this.state.eu.longitude), 2));
+                            if(dista< 0.2){
+                                var val = (totals[item] / simsum[item]) - (dista * 10);
+                                console.log(dista);
+                                console.log(totals[item] / simsum[item])
+                                console.log(val);
+                                switch(this.state.tipos[item]) {
+                                    case "Café":
+                                        switch(true){
+                                            case 0 <= this.state.hora && this.state.hora <= 5:
+                                                break
+                                            case this.state.hora > 5 && this.state.hora < 11:
+                                                val+=0.5;
+                                                break
+                                            case this.state.hora > 10 && this.state.hora < 15:
+                                                break
+                                            case this.state.hora > 14 && this.state.hora < 19:
+                                                val+=0.5;
+                                                console.log(val);
+                                                break
+                                            case this.state.hora > 18 && this.state.hora <=23:
+                                                break
+                                        }
+                                      break;
+                                    case "Restaurante":
+                                        switch(true){
+                                            case 0 <= this.state.hora && this.state.hora <= 5:
+                                                break
+                                            case this.state.hora > 5 && this.state.hora < 11:
+                                                break
+                                            case this.state.hora > 10 && this.state.hora < 15:
+                                                val+=0.5;
+                                                break
+                                            case this.state.hora > 14 && this.state.hora < 19:
+                                                break
+                                            case this.state.hora > 18 && this.state.hora <=23:
+                                                val+=0.5;
+                                                break
+                                        }
+                                        break;
+                                }
+                                rank_lst.push({val:val,items: item});
+                            }
+               }
+            }
+            console.log(rank_lst);
+            rank_lst.sort(function(a,b){
+                return b.val < a.val ? -1 : b.val > a.val ? 1 : b.val >= a.val ? 0 : NaN;
+            });
+            var recommend = []; 
+            for(var i in rank_lst){
+                recommend.push(rank_lst[i].items);
+            }
+            console.log(rank_lst);
+            console.log(recommend);
+            this.setState({rankitems: recommend});
+            var list= {};
+            if(localStorage.getItem("preferencias") == "lactose"){
+            firebase.firestore().collection("Restaurantes").where("LactoseFO", "==", true).get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    var verify=String(doc.data().Id);
+                    if(recommend.includes(verify)){
+                        list[doc.data().Id]= doc.data();
+                    }
+                });
+            this.setState({recomendar: list});
+            console.log(this.state.recomendar);
+            })}
+            else{
+                if(localStorage.getItem("preferencias") == "gluten"){
+                    firebase.firestore().collection("Restaurantes").where("GlutenFO", "==", true).get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
                             var verify=String(doc.data().Id);
                             if(recommend.includes(verify)){
                                 list[doc.data().Id]= doc.data();
                             }
                         });
                     this.setState({recomendar: list});
+                    console.log(this.state.recomendar);
                     })}
-            }
+                else{
+                    if(localStorage.getItem("preferencias") == "ambos"){
+                        firebase.firestore().collection("Restaurantes").where("Id", ">=", 0).get().then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                var verify=String(doc.data().Id);
+                                if(recommend.includes(verify)){
+                                    list[doc.data().Id]= doc.data();
+                                }
+                            });
+                        this.setState({recomendar: list});
+                        })}
+                }
         }
+        
+        
     }
 
     botao_centralizar(latitude, longitude){     //função pra setar as coordenadas do setcenter do maps
@@ -209,6 +253,9 @@ export default class Recomendacao extends Component{
     }
 
     componentDidMount(){
+        navigator.geolocation.getCurrentPosition((position) => {
+            this.state.eu= position.coords;
+          });
         $("body").css("overflow-y", "scroll");
         $(".container_all_homepage").css("height","auto");
         firebase.auth().onAuthStateChanged((user) => {
@@ -225,20 +272,29 @@ export default class Recomendacao extends Component{
             }
         });
         var lista={};
+        firebase.firestore().collection("Restaurantes").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => { 
+                this.state.latitudes[doc.data().Id]= doc.data().Latitude;
+                this.state.longitudes[doc.data().Id]= doc.data().Longitude;
+                this.state.tipos[doc.data().Id]= doc.data().Tipo;
+            });
+        })
         this.setState({usuarios: 0});
         firebase.firestore().collection("Users").get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
+                //firebase.firestore().collection("Users2").doc(doc.id).set(doc.data());            duplicação do banco
                 // doc.data() is never undefined for query doc snapshots
                 lista[doc.id]=doc.data().Notas;
                 this.setState({usuarios: this.state.usuarios+1});
             });
             this.setState({avaliacoes: lista})
+            
             var date= new Date();
             this.setState({hora: date.getHours()});
             this.rank(this.state.avaliacoes, firebase.auth().currentUser.uid, this.state.usuarios-1);
             this.recomendador(this.state.avaliacoes, firebase.auth().currentUser.uid);
-            console.log(this.state.recomendar);
         });
+        
     }
 
     render(){
@@ -302,12 +358,14 @@ export default class Recomendacao extends Component{
                     </Navbar.Collapse>
                 </Navbar>
                 <div className="container_recomendacao">
-                    {Object.values(Object.values(this.state.recomendar)).map((dado) => {
-                        console.log(dado);
-                        return <button className="card" onClick={() => this.botao_centralizar(dado.Latitude, dado.Longitude)}>
-                            <h1>{dado.Nome}</h1>
-                            <p>{dado.Tipo}</p>
-                        </button>
+                    {Object.values(Object.values(this.state.rankitems)).map((dado) => {
+                        if (this.state.recomendar[dado] !== undefined) {
+                            return <button className="card" onClick={() => this.botao_centralizar(this.state.recomendar[dado].Latitude, this.state.recomendar[dado].Longitude)}>
+                                <h1>{this.state.recomendar[dado].Nome}</h1>
+                                <p>{this.state.recomendar[dado].Tipo}</p>
+                            </button>
+                        }
+                        
                         })
                     }
                 </div>

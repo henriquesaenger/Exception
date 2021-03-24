@@ -7,6 +7,7 @@ import $ from 'jquery';
 import Autocomplete from 'react-autocomplete';
 import { Navbar, NavDropdown, Form, FormControl, Button, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { NavLink } from 'react-router-dom';
 
 
 export default class Home extends Component {
@@ -17,13 +18,38 @@ export default class Home extends Component {
         this.state = {
             value: "",
             nomes: [],
-            restaurantes: {}
+            restaurantes: {},
+            nota: {}
         };
         this.handleChange = this.handleChange.bind(this);
         this.centralizar = this.centralizar.bind(this);
+        this.randomizar = this.randomizar.bind(this);
     }
 
     handleChange = (e) => { this.setState({ value: e.target.value }) }
+
+    randomizar(){
+        console.log("entrou random")
+        firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).get().then((dados) =>{
+            if(dados.exists){
+              this.setState({nota: dados.data().Notas});
+            }
+            else{
+              this.setState({nota: {} });
+            }
+        })
+        var single= this.state.nota;
+        for(var i = 0; i<=29 ;i++){
+            single[Math.floor(Math.random() * 54)] = Math.floor(Math.random() * 5) + 1;
+        }
+        this.setState({nota: single});
+        firebase.firestore().collection("Users").doc(firebase.auth().currentUser.uid).set({
+          Notas: this.state.nota
+        })
+        console.log(firebase.auth().currentUser.uid);
+
+    }
+
 
     centralizar(restaurante) {
         console.log(restaurante);
@@ -66,6 +92,7 @@ export default class Home extends Component {
                 });
                 this.setState({ nomes: ad });
                 this.setState({ restaurantes: list });
+                
 
                 console.log(this.state.restaurantes);
             })
@@ -149,6 +176,8 @@ export default class Home extends Component {
                                 })
                             }}>Preferências</Nav.Link>
                             <Nav.Link id="item" href="/recomendacao">Recomendações</Nav.Link>
+                            {//<Nav.Link onClick={() => this\.randomizar()}>Randomizar</Nav.Link>
+                            }
                         </Nav>
                         <button id="botao_sair" onClick={() => {
                         firebase.auth().signOut().then(() => {
