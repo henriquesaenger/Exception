@@ -3,7 +3,7 @@ import "firebase/firestore";
 
 
 const config ={
-    apiKey: "AIzaSyA91qIDNfhQ56rj80m4ZkwvI0CAMy7OGfE",
+    apiKey: "",
     authDomain: "web-tcc-52fd1.firebaseapp.com",
     projectId: "web-tcc-52fd1",
     storageBucket: "web-tcc-52fd1.appspot.com",
