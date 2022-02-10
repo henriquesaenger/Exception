@@ -6,7 +6,7 @@ import firebase from 'firebase';
   // Your web app's Firebase configuration
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   var firebaseConfig = {
-    apiKey: "AIzaSyA91qIDNfhQ56rj80m4ZkwvI0CAMy7OGfE",
+    apiKey: "", //Insira aqui a chave da API(removida por motivos de precaução)
     authDomain: "web-tcc-52fd1.firebaseapp.com",
     projectId: "web-tcc-52fd1",
     storageBucket: "web-tcc-52fd1.appspot.com",
